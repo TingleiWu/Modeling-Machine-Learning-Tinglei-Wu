@@ -7,8 +7,9 @@ output: github_document
 ```{r}
 library('class')
 library('dplyr')
-
 ```
+
+
 ## load binary classification example data from author website 
 ## 'ElemStatLearn' package no longer available
 

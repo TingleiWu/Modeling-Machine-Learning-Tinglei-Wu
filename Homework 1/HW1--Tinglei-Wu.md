@@ -19,6 +19,10 @@ library('dplyr')
     ## 
     ##     intersect, setdiff, setequal, union
 
+``` r
+knitr::opts_chunk$set(fig.path='Figs/')
+```
+
 ## load binary classification example data from author website
 
 ## ‘ElemStatLearn’ package no longer available
@@ -42,7 +46,7 @@ plot_mix_data <- expression({
 eval(plot_mix_data)
 ```
 
-![](HW1--Tinglei-Wu_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
+![](Figs/unnamed-chunk-2-1.png)<!-- -->
 
 ``` r
 ## fit linear classifier
@@ -85,7 +89,7 @@ eval(plot_mix_data)
 sapply(new_predict_lc, lines)
 ```
 
-![](HW1--Tinglei-Wu_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+![](Figs/unnamed-chunk-4-1.png)<!-- -->
 
     ## $`1`
     ## NULL
@@ -718,7 +722,7 @@ contour(lc_pred,
       ylab=expression(x[2]))
 ```
 
-![](HW1--Tinglei-Wu_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](Figs/unnamed-chunk-6-1.png)<!-- -->
 
 ``` r
 ## More flexible model
@@ -730,7 +734,7 @@ contour(lc_new_pred,
       ylab=expression(x[2]))
 ```
 
-![](HW1--Tinglei-Wu_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->
+![](Figs/unnamed-chunk-6-2.png)<!-- -->
 
 ``` r
 lc_count = contourLines(dat$px1, dat$px2, lc_new_pred, levels = 0.5)
@@ -738,7 +742,7 @@ eval(plot_mix_data)
 sapply(lc_count, lines)
 ```
 
-![](HW1--Tinglei-Wu_files/figure-gfm/unnamed-chunk-6-3.png)<!-- -->
+![](Figs/unnamed-chunk-6-3.png)<!-- -->
 
     ## [[1]]
     ## NULL
@@ -764,7 +768,7 @@ contour(lc_pred,
       ylab=expression(x[2]))
 ```
 
-![](HW1--Tinglei-Wu_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](Figs/unnamed-chunk-7-1.png)<!-- -->
 
 ``` r
 ## find the contours in 2D space such that lc_pred == 0.5
@@ -775,7 +779,7 @@ eval(plot_mix_data)
 sapply(lc_cont, lines)
 ```
 
-![](HW1--Tinglei-Wu_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+![](Figs/unnamed-chunk-8-1.png)<!-- -->
 
     ## [[1]]
     ## NULL
@@ -795,7 +799,7 @@ contour(knn_pred,
         levels=c(0.2, 0.5, 0.8))
 ```
 
-![](HW1--Tinglei-Wu_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](Figs/unnamed-chunk-9-1.png)<!-- -->
 
 ``` r
 ## find the contours in 2D space such that knn_pred == 0.5
@@ -806,7 +810,7 @@ eval(plot_mix_data)
 sapply(knn_cont, lines)
 ```
 
-![](HW1--Tinglei-Wu_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](Figs/unnamed-chunk-10-1.png)<!-- -->
 
     ## [[1]]
     ## NULL
@@ -852,7 +856,7 @@ for(b in 1:3) {
 }
 ```
 
-![](HW1--Tinglei-Wu_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](Figs/unnamed-chunk-11-1.png)<!-- -->
 
 ``` r
 ## plot 5-NN classifier for three bootstraps
@@ -876,7 +880,7 @@ for(b in 1:3) {
 }
 ```
 
-![](HW1--Tinglei-Wu_files/figure-gfm/unnamed-chunk-11-2.png)<!-- -->
+![](Figs/unnamed-chunk-11-2.png)<!-- -->
 
 ``` r
 ## plot 20-NN classifier for three bootstraps
@@ -900,4 +904,4 @@ for(b in 1:3) {
 }
 ```
 
-![](HW1--Tinglei-Wu_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](Figs/unnamed-chunk-12-1.png)<!-- -->
