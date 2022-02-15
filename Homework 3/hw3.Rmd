@@ -1,0 +1,186 @@
+---
+title: "hw3"
+author: "Tinglei Wu"
+date: "2/14/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+
+```{r}
+library('splines')        ## for 'bs'
+library('dplyr')          ## for 'select', 'filter', and others
+library('magrittr')       ## for '%<>%' operator
+library('glmnet')         ## for 'glmnet'
+
+###  Linear regression examples ###
+
+## load prostate data
+prostate <- 
+  read.table(url(
+    'https://web.stanford.edu/~hastie/ElemStatLearn/datasets/prostate.data'))
+
+pairs(prostate)
+
+## split prostate into testing and training subsets
+prostate_train <- prostate %>%
+  filter(train == TRUE) %>% 
+  select(-train)
+
+summary(prostate_train)
+
+prostate_test <- prostate %>%
+  filter(train == FALSE) %>% 
+  select(-train)
+
+
+```
+
+
+##Question 2:
+
+```{r}
+cor(prostate_train)
+
+```
+
+
+
+##Question 3,4:
+
+```{r}
+
+lcavol_out<- lm(lcavol ~ ., data=prostate_train)
+lcavol_out
+
+```
+
+
+##Question 5:
+
+```{r}
+L2_loss <- function(y, yhat)
+  (y-yhat)^2
+err <- function(dat, fit, loss=L2_loss)
+  mean(loss(dat$lcavol, predict(fit, newdata=dat)))
+## training error
+err(prostate_train, lcavol_out)
+## testing error
+err(prostate_test, lcavol_out)
+
+
+```
+
+
+##Question 6:
+
+```{r}
+form  <- lcavol ~  lweight + age + lbph + lcp + pgg45 + lpsa + svi + gleason
+x_inp <- model.matrix(form, data=prostate_train)
+y_out <- prostate_train$lcavol
+glmnet <- glmnet(x=x_inp, y=y_out, lambda=seq(0.8, 0, -0.05), alpha = 0)
+print(glmnet$beta)
+
+## functions to compute testing error with glmnet
+error <- function(dat, glmnet, lam, form, loss=L2_loss) {
+  x_inp <- model.matrix(form, data=dat)
+  y_out <- dat$lcavol
+  y_hat <- predict(glmnet, newx=x_inp, s=lam)  ## see predict.elnet
+  mean(loss(y_out, y_hat))
+}
+
+## training error at lambda=0.01
+error(prostate_train, glmnet, lam=0.01, form=form)
+## testing error at lambda=0.01
+error(prostate_test, glmnet, lam=0.01, form=form)
+
+## training error at lambda=0.1
+error(prostate_train, glmnet, lam=0.1, form=form)
+## testing error at lambda=0.1
+error(prostate_test, glmnet, lam=0.1, form=form)
+
+## training error at lambda=0.2
+error(prostate_train, glmnet, lam=0.2, form=form)
+## testing error at lambda=0.2
+error(prostate_test, glmnet, lam=0.2, form=form)
+
+## training error at lambda=0.3
+error(prostate_train, glmnet, lam=0.3, form=form)
+## testing error at lambda=0.3
+error(prostate_test, glmnet, lam=0.3, form=form)
+
+## training error at lambda=0.4
+error(prostate_train, glmnet, lam=0.4, form=form)
+## testing error at lambda=0.4
+error(prostate_test, glmnet, lam=0.4, form=form)
+
+## training error at lambda=0.5
+error(prostate_train, glmnet, lam=0.5, form=form)
+## testing error at lambda=0.5
+error(prostate_test, glmnet, lam=0.5, form=form)
+
+## training error at lambda=0.6
+error(prostate_train, glmnet, lam=0.6, form=form)
+## testing error at lambda=0.6
+error(prostate_test, glmnet, lam=0.6, form=form)
+
+## training error at lambda=0.7
+error(prostate_train, glmnet, lam=0.7, form=form)
+## testing error at lambda=0.7
+error(prostate_test, glmnet, lam=0.7, form=form)
+
+```
+
+
+##Question 7:
+
+```{r}
+err_train_1 <- sapply(glmnet$lambda, function(lam) 
+  error(prostate_train, glmnet, lam, form))
+err_test_1 <- sapply(glmnet$lambda, function(lam) 
+  error(prostate_test, glmnet, lam, form))
+
+## plot test/train error
+plot(x=range(glmnet$lambda),
+     y=range(c(err_train_1, err_test_1)),
+     xlim=rev(range(glmnet$lambda)),
+     type='n',
+     xlab=expression(lambda),
+     ylab='train/test error')
+points(glmnet$lambda, err_train_1, pch=19, type='b', col='darkblue')
+points(glmnet$lambda, err_test_1, pch=19, type='b', col='darkred')
+legend('topright', c('train','test'), lty=1, pch=19,
+       col=c('darkblue','darkred'), bty='n')
+
+colnames(glmnet$beta) <- paste('lam =', glmnet$lambda)
+print(glmnet$beta %>% as.matrix)
+
+
+```
+
+##Question 8:
+
+```{r}
+plot(x=range(glmnet$lambda),
+     y=range(as.matrix(glmnet$beta)),
+     type='n',
+     xlab=expression(lambda),
+     ylab='Coefficients')
+for(i in 1:nrow(glmnet$beta)) {
+  points(x=glmnet$lambda, y=glmnet$beta[i,], pch=19, col='#00000055')
+  lines(x=glmnet$lambda, y=glmnet$beta[i,], col='#00000055')
+}
+text(x=0, y=glmnet$beta[,ncol(glmnet$beta)], 
+     labels=rownames(glmnet$beta),
+     xpd=NA, pos=4, srt=45)
+abline(h=0, lty=3, lwd=2)
+
+
+
+```
+
