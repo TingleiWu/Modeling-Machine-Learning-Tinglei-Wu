@@ -1,0 +1,197 @@
+---
+title: "hw4"
+author: "Tinglei Wu"
+date: "2/21/2022"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Exercise 4:
+
+## Part a:
+
+* Since we know that if we want to predict the response for a test observation with X=0.6, we will use observations in the range [0.55,0.65], in this case, if x is between 0 and 1, then the observation we want to use are in the interval [x−0.05,x+0.05] which represents a length of 0.1 and a fraction of 10%. However, we would also consider a situation that if x is less than 0.05, which the observation interval becomes [0, x+0.05], because the interval cannot be negative. Another situation is that when x is greater than 0.95, so the interval would become [x-0.05, 1]. Therefore, the average fraction we will use to make the prediction is: 
+
+\[ \int_{0.05}^{0.95} 10 \,dx  + \int_{0}^{0.05} 100x+5 \,dx + \int_{0.95}^{1} 105-100x \,dx = 9 + 0.375 + 0.375 = 9.75\]
+
+Therefore, the average fraction of observations we would use for prediction is 9.75%
+
+
+## Part b:
+
+* When it becomes 2 features with p = 2, we can simply calculate the fraction of observations that we would use for prediction by using \[9.75\%^2 = 0.950625\].
+
+## Part c:
+
+* When the features become 100 with p = 100, it is the same thing for us to calculate the fraction of observations that we would use for prediction except the power would become 100: \[9.75\%^{100}\approx 0 \].
+
+
+
+## Part d:
+
+* As we can see from the previous questions, as the number of features increases, the fraction of observations that we would use for prediction decreases. When p becomes infinity, the fraction of observations that we would use for prediction becomes 0.
+
+# Part e:
+
+* Since it contains 10% of the trainning observations, when p = 1, length of each side of the hypercube is 0.1. When p = 2, the length of the each side of the hypercube is \[0.1^{1/2}\], when p = 100, the length of the each side of the hypercube is \[0.1^{1/100}\].
+
+
+# Exercise 10:
+
+## Part a:
+```{r}
+library(ISLR)
+summary(Weekly)
+cor(Weekly[, -9])
+attach(Weekly)
+plot(Volume)
+```
+
+* The Year and Volume variables seem to have very high positive correlation between each other,0.84194162, and the graph of Volume is also increasing over time.
+
+## Part b:
+
+```{r}
+head(Weekly)
+
+fit.glm <- glm(Direction ~ Lag1 + Lag2 + Lag3 + Lag4 + Lag5 + Volume, data = Weekly, family = binomial)
+summary(fit.glm)
+```
+
+* From the results above, we can see that Lag2 is the only predictor that has a p-value lower than 0.05, so Lag2 is statistically significant.
+
+## Part c:
+
+```{r}
+probs <- predict(fit.glm, type = "response")
+pred.glm <- rep("Down", length(probs))
+pred.glm[probs > 0.5] <- "Up"
+table(pred.glm, Direction)
+
+
+```
+
+
+* Overall, the accuracy of the prediction is about (54+557)/1089 = 56.1%, thus the error rate of the prediction is about 43.9%.
+
+## Part d:
+
+```{r}
+train <- (Year < 2009)
+Weekly.20092010 <- Weekly[!train, ]
+Direction.20092010 <- Direction[!train]
+fit.glm2 <- glm(Direction ~ Lag2, data = Weekly, family = binomial, subset = train)
+summary(fit.glm2)
+
+probs2 <- predict(fit.glm2, Weekly.20092010, type = "response")
+pred.glm2 <- rep("Down", length(probs2))
+pred.glm2[probs2 > 0.5] <- "Up"
+table(pred.glm2, Direction.20092010)
+```
+
+* In this case, we only use Lag2 as the predictor to predict the Direction, and the accuracy of the prediction is (9+56)/104 = 62.5%, thus the error rate of the prediction is 37.5%.
+
+## Part e:
+
+```{r}
+
+library(MASS)
+fit.lda <- lda(Direction ~ Lag2, data = Weekly, subset = train)
+fit.lda
+pred.lda <- predict(fit.lda, Weekly.20092010)
+table(pred.lda$class, Direction.20092010)
+
+```
+
+
+* Using the LDA actually gives us the same result as glm, the accuracy of the prediction is (9+56)/104 = 62.5%, thus the error rate of the prediction is 37.5%. 
+
+## Part f:
+
+```{r}
+fit.qda <- qda(Direction ~ Lag2, data = Weekly, subset = train)
+fit.qda
+
+pred.qda <- predict(fit.qda, Weekly.20092010)
+table(pred.qda$class, Direction.20092010)
+```
+
+* Using the QDA gives us the accuracy of the prediction to be 61/104 = 58.65%, and the error rate of prediction is 41.35%. However, we can see that the model is only choosing Up as the answer and not even have one Down answer.
+
+## Part g:
+
+```{r}
+library(class)
+train.X <- as.matrix(Lag2[train])
+test.X <- as.matrix(Lag2[!train])
+train.Direction <- Direction[train]
+set.seed(1)
+pred.knn <- knn(train.X, test.X, train.Direction, k = 1)
+table(pred.knn, Direction.20092010)
+
+
+
+
+
+```
+
+
+* The accuracy of prediction using KNN with k = 1 is (21+31)/104 = 50%, and thus the error rate of the prediction is also 50%. 
+
+## Part h:
+
+* From the previous results, we can see that the logistic regression and LDA have the best performances in terms of accuracy of the prediction. 
+
+
+## Part i:
+
+
+```{r}
+# Logistic regression with Lag2:Lag4
+fit.glm3 <- glm(Direction ~ Lag2:Lag4, data = Weekly, family = binomial, subset = train)
+probs3 <- predict(fit.glm3, Weekly.20092010, type = "response")
+pred.glm3 <- rep("Down", length(probs3))
+pred.glm3[probs3 > 0.5] = "Up"
+table(pred.glm3, Direction.20092010)
+
+mean(pred.glm3 == Direction.20092010)
+
+```
+
+```{r}
+# LDA with Lag2 interaction with Lag3
+fit.lda2 <- lda(Direction ~ Lag3:Lag1, data = Weekly, subset = train)
+pred.lda2 <- predict(fit.lda2, Weekly.20092010)
+mean(pred.lda2$class == Direction.20092010)
+```
+
+```{r}
+# QDA with Volume
+fit.qda2 <- qda(Direction ~ Lag2 + Volume, data = Weekly, subset = train)
+pred.qda2 <- predict(fit.qda2, Weekly.20092010)
+table(pred.qda2$class, Direction.20092010)
+mean(pred.qda2$class == Direction.20092010)
+```
+
+
+```{r}
+# KNN k = 19
+pred.knn2 <- knn(train.X, test.X, train.Direction, k = 19)
+table(pred.knn2, Direction.20092010)
+mean(pred.knn2 == Direction.20092010)
+
+
+```
+
+* After examine the combinations of predictors, the original logistic regression and LDA still have the best performaces in terms of accuracy of the prediction overall.
+
+
+
+
+
+
