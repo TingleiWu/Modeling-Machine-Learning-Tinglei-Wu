@@ -1,0 +1,88 @@
+---
+title: "hw6"
+author: "Tinglei Wu"
+date: "3/29/2022"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+library('ElemStatLearn')
+library('randomForest')
+library('caret') 
+```
+
+
+# Q1 and Q2:
+
+```{r}
+vowel.train
+?randomForest
+vowel.train$y=factor(vowel.train$y)
+```
+
+
+#Q3:
+
+```{r}
+random_forest_model=randomForest(y ~ ., data=vowel.train)
+
+
+```
+
+
+#Q4:
+
+```{r}
+
+set.seed(123)
+vowel_flds  <- createFolds(vowel.train, k=5)
+#vowel_flds
+
+cvrf <- function(mtry,node, flds=vowel_flds) {
+  cverr <- rep(NA, length(flds))
+  for(tst_idx in 1:length(flds)) { ## for each fold
+    
+    ## get training and testing data
+    vowel_trn <- vowel.train[-flds[[tst_idx]],]
+    vowel_tst <- vowel.train[ flds[[tst_idx]],]
+    
+    ## fit kNN model to training data
+    rf_fit <- randomForest(y ~ ., mtry=mtry,nodesize = node, data=vowel_trn)
+    
+    #calculate classifaction error
+    cverr[tst_idx]=mean(rf_fit$err.rate[,1])
+  }
+  return(mean(cverr))
+}
+```
+
+```{r}
+err_table <- expand.grid(mtry = c(3,4,5),node= c(1,5,10,20,40,80),error = NA)
+for (i in 1:nrow(err_table)) {
+    err_table[i,3] <- cvrf(mtry=err_table[i,1],node=err_table[i,2],flds = vowel_flds)
+}
+err_table
+
+
+```
+* After tuning the table, we found out that when the mtry is 3 and node is 1 gives the smallest error.
+
+
+# Question 5:
+
+```{r}
+set.seed(10)
+tune_model <- randomForest(y ~ ., data=vowel.train,mtry=3,nodesize=1)
+test_feature = vowel.test[,2:ncol(vowel.test)]
+test_variable = as.factor(vowel.test$y)
+predic_test = predict(tune_model, newdata = test_feature)
+#cverr = rep(NA, length(test_feature))
+
+confusionMatrix(predic_test, test_variable)
+
+
+```
+
+* Based on the confusion matrix, the misclassification rate is about 41%.
